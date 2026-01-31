@@ -1,0 +1,33 @@
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+h1 {
+  margin: 2em auto 1em;
+  width: fit-content;
+}
+
+.input-container {
+}
+.todo-label {
+  font-style: italic;
+  align-self: flex-start;
+  justify-self: self-start;
+}
+
+#todo-input {
+  margin: 1.2em 0;
+  padding: 0.4em 2em;
+}
+
+.btn {
+  padding: 0.4em 2em;
+  margin: 0.5em;
+}
