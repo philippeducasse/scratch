@@ -1,33 +1,140 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
   font-family: "Roboto", sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #d5cedb 100%);
+  min-height: 100vh;
+  padding: 2rem;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  padding: 2rem;
 }
 
 h1 {
-  margin: 2em auto 1em;
-  width: fit-content;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+  font-size: 2rem;
+  text-align: center;
 }
 
 .input-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
+
 .todo-label {
-  font-style: italic;
-  align-self: flex-start;
-  justify-self: self-start;
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
 }
 
 #todo-input {
-  margin: 1.2em 0;
-  padding: 0.4em 2em;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#todo-input:focus {
+  border-color: #667eea;
 }
 
 .btn {
-  padding: 0.4em 2em;
-  margin: 0.5em;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #667eea;
+  color: #fff;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.btn:hover:not(:disabled) {
+  background-color: #5a6fd6;
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+ul {
+  list-style: none;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  transition: background-color 0.2s;
+}
+
+li:hover {
+  background: #f0f1f3;
+}
+
+li span {
+  flex: 1;
+  color: #333;
+  cursor: pointer;
+}
+
+li span:hover {
+  color: #667eea;
+}
+
+li input[type="text"] {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  outline: none;
+}
+
+.done {
+  text-decoration: line-through;
+  color: #888;
+}
+
+.error {
+  color: red;
+  display: block;
 }
