@@ -1,4 +1,4 @@
-import { h } from "./h.js";
+const { h } = require("./h");
 
 const test = h("form,", { class: "login-form,", action: "login" }, [
   h("input", { type: "text", name: "user" }),

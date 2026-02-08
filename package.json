@@ -23,5 +23,5 @@
     "example": "examples"
   },
   "author": "",
-  "type": "commonjs"
+  "type": "module"
 }
