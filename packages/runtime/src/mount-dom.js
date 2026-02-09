@@ -41,9 +41,9 @@ function createElementNode(vdom, parentEl) {
 
   const element = document.createElement(tag);
   addProps(element, props, vdom);
-  vdom.el = parentEl;
+  vdom.el = element;
 
-  children.forEach((child) => mountDOM(child, parentEl));
+  children.forEach((child) => mountDOM(child, element));
   parentEl.append(element);
 }
 
