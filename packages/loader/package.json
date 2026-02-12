@@ -10,9 +10,9 @@
     "web",
     "development"
   ],
-  "main": "dist/fe-fwk.js",
+  "main": "dist/philo-scratch.js",
   "files": [
-    "dist/fe-fwk.js"
+    "dist/philo-scratch.js"
   ],
   "scripts": {
     "build": "rollup -c",

@@ -1,5 +1,5 @@
 {
-  "name": "scratch",
+  "name": "philo-scratch",
   "version": "1.0.0",
   "private": true,
   "description": "Code for the book 'Build a frontend framework from scratch'. Buy your copy at {{bookUrl}}.",

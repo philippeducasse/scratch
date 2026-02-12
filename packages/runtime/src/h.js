@@ -1,7 +1,7 @@
 // h --> short for hyperscript
 // these are all the functions needed to create the virtual DOM elements
 
-import { withoutNulls, mapTextNodes } from "./arrays.js";
+import { withoutNulls, mapTextNodes } from "./utils/arrays";
 
 export const DOM_TYPES = {
   TEXT: "text",
