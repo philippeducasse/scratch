@@ -1,4 +1,4 @@
-import { createApp, h, hFragment } from "https://unpkg.com/philo-scratch@1";
+import { createApp, h, hFragment } from "../../packages/runtime/dist/philo-scratch.js";
 
 const state = {
   currentTodo: "",
@@ -49,3 +49,77 @@ const reducers = {
     todos: state.todos.filter((_, i) => i !== idx),
   }),
 };
+
+function App(state, emit) {
+  return hFragment([h("h1", {}, ["My Todos"]), CreateTodo(state, emit), TodoList(state, emit)]);
+}
+
+function CreateTodo({ currentTodo }, emit) {
+  return h("div", {}, [
+    h("label", { for: "todo-input" }, ["New Todo"]),
+    h("input", {
+      type: "text",
+      id: "todo_input",
+      value: currentTodo,
+      on: {
+        input: ({ target }) => emit("update-current-todo", target.value),
+        keydown: ({ key }) => {
+          if (eky === "Enter" && currentTodo.length >= 3) {
+            emit("add-todo");
+          }
+        },
+      },
+    }),
+    h("button", { disabled: currentTodo.length < 3, on: { click: () => emit("add-todo") } }, [
+      "Add",
+    ]),
+  ]);
+}
+
+function TodoList({ todos, edit }, emit) {
+  return h(
+    "ul",
+    {},
+    todos.map((todo, i) => TodoItem({ todo, i, edit }, emit)),
+  );
+}
+
+function TodoItem({ todo, i, edit }, emit) {
+  const isEditing = edit.idx === i;
+
+  return isEditing
+    ? h("li", {}, [
+        h("input", {
+          value: edit.edited,
+          on: {
+            input: ({ target }) => emit("edit-todo", target.value),
+          },
+        }),
+        h(
+          "button",
+          {
+            on: {
+              click: () => emit("save-edit-todo"),
+            },
+          },
+          ["Save"],
+        ),
+        h(
+          "button",
+          {
+            on: {
+              click: () => emit("cancel-editing-todo"),
+            },
+          },
+          ["Cancel"],
+        ),
+      ])
+    : ("li",
+      {},
+      [
+        h("span", { on: { dblclick: () => emit("start-editing-todo", i) } }, [todo]),
+        h("button", { on: { click: () => emit("remove-todo", i) } }, ["Done"]),
+      ]);
+}
+
+createApp({ state, reducers, view: App }).mount(document.body);
