@@ -39,15 +39,18 @@ const reducers = {
     return { ...state, edit: { idx: null, original: null, edited: null }, todos };
   },
 
-  "cancelediting-todo": (state) => ({
+  "cancel-editing-todo": (state) => ({
     ...state,
     edit: { idx: null, original: null, edited: null },
   }),
 
-  "remove-todo": (state, idx) => ({
-    ...state,
-    todos: state.todos.filter((_, i) => i !== idx),
-  }),
+  "remove-todo": (state, idx) => {
+    const n = {
+      ...state,
+      todos: state.todos.filter((_, i) => i !== idx),
+    };
+    return n;
+  },
 };
 
 function App(state, emit) {
@@ -64,7 +67,7 @@ function CreateTodo({ currentTodo }, emit) {
       on: {
         input: ({ target }) => emit("update-current-todo", target.value),
         keydown: ({ key }) => {
-          if (eky === "Enter" && currentTodo.length >= 3) {
+          if (key === "Enter" && currentTodo.length >= 3) {
             emit("add-todo");
           }
         },
@@ -114,12 +117,21 @@ function TodoItem({ todo, i, edit }, emit) {
           ["Cancel"],
         ),
       ])
-    : ("li",
-      {},
-      [
+    : h("li", {}, [
         h("span", { on: { dblclick: () => emit("start-editing-todo", i) } }, [todo]),
-        h("button", { on: { click: () => emit("remove-todo", i) } }, ["Done"]),
+
+        h(
+          "button",
+          {
+            on: {
+              click: () => {
+                (console.log("cancelling todo"), emit("remove-todo", i));
+              },
+            },
+          },
+          ["Done"],
+        ),
       ]);
 }
-
-createApp({ state, reducers, view: App }).mount(document.body);
+console.log({ state, reducers });
+createApp({ state, view: App, reducers }).mount(document.body);

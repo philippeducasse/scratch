@@ -223,7 +223,7 @@ function createApp({ state, view, reducers = {} }) {
   }
   function renderApp() {
     if (vdom) {
-      destroyDOM();
+      destroyDOM(vdom);
     }
     vdom = view(state, emit);
     mountDOM(vdom, parentEl);
