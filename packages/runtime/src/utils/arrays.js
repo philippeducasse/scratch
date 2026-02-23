@@ -7,3 +7,10 @@ export function withoutNulls(children) {
 export function mapTextNodes(children) {
   return children.map((child) => (typeof child === "string" ? hString(child) : child));
 }
+
+export function arraysDiff(oldArray, newArray) {
+  return {
+    added: newArray.filter((item) => !oldArray.includes(item)),
+    removed: oldArray.filter((item) => !newArray.includes(item)),
+  };
+}
