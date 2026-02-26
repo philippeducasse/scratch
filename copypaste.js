@@ -254,3 +254,18 @@ class Dispatcher {
     this.#afterHandlers.forEach((handler) => handler());
   }
 }
+
+function areNodesEqual(nodeOne, nodeTwo) {
+  if (nodeOne.type !== nodeTwo.type) {
+    return false;
+  }
+
+  if (nodeOne.type === DOM_TYPES.ELEMENT) {
+    const { tag: tagOne } = nodeOne;
+    const { tag: tagTwo } = nodeOne;
+
+    return tagOne === tagTwo;
+  }
+
+  return true;
+}
