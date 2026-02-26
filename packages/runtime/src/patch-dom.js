@@ -2,6 +2,10 @@ import { destroyDOM } from "./destroy-dom";
 import { mountDOM } from "./mount-dom";
 import { DOM_TYPES } from "./h";
 import { areNodesEqual } from "./nodes-equal";
+import { removeAttribute, setAttribute } from "./attributes";
+import { objectsDiff } from "./utils/objects";
+import { arraysDiff } from "./utils/arrays";
+import { isNotBlankOrEmptyString } from "./utils/strings";
 
 export function patchDOM(oldVdom, newVdom, parentEl) {
   if (!areNodesEqual(oldVdom, newVdom)) {
@@ -56,4 +60,36 @@ function patchElement(oldVdom, newVdom) {
   patchClasses(el, oldClass, newClass);
   patchStyles(el, oldStyle, newStyle);
   newVdom.listeners = patchEvents(el, oldListeners, oldEvents, newEvents);
+}
+
+function patchAttrs(el, oldAttrs, newAttrs) {
+  const { added, removed, updated } = objectsDiff(oldAttrs, newAttrs);
+
+  for (const attr of removed) {
+    removeAttribute(el, attr);
+  }
+
+  for (const attr of added.concat(updated)) {
+    setAttribute(el, attr, newAttrs[attr]);
+  }
+}
+
+function patchClasses(el, oldClass, newClass) {
+  const oldClasses = toClassList(oldClass);
+  const newClasses = toClassList(newClass);
+
+  const { added, removed } = arraysDiff(oldClasses, newClasses);
+
+  if (removed.length > 0) {
+    el.classList.remove(...removed);
+  }
+  if (added.length > 0) {
+    el.classList.add(...added);
+  }
+}
+
+function toClassList(classes = "") {
+  return Array.isArray(classes)
+    ? classes.filter(isNotBlankOrEmptyString)
+    : classes.split(/(\s+)/).filter(isNotBlankOrEmptyString);
 }

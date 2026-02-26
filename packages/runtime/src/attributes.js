@@ -39,8 +39,10 @@ export function setAttribute(el, name, value) {
   if (value == null) {
     removeAttribute(el, name);
   } else if (name.startsWith("data-")) {
+    // data attributes dont have their own properties on the DOM, so must use setAttribute
     el.setAttribute(name, value);
   } else {
+    // if attribute is value, for example, then we can access the attribute name directly on the element
     el[name] = value;
   }
 }
