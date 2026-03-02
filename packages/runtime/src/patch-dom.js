@@ -1,11 +1,12 @@
 import { destroyDOM } from "./destroy-dom";
 import { mountDOM } from "./mount-dom";
-import { DOM_TYPES } from "./h";
+import { DOM_TYPES, extractChildren } from "./h";
 import { areNodesEqual } from "./nodes-equal";
-import { removeAttribute, setAttribute } from "./attributes";
+import { removeAttribute, setAttribute, setStyle, removeStyle } from "./attributes";
 import { objectsDiff } from "./utils/objects";
-import { arraysDiff } from "./utils/arrays";
+import { ARRAY_DIF_OP, arrayDiffSequence, arraysDiff } from "./utils/arrays";
 import { isNotBlankOrEmptyString } from "./utils/strings";
+import { addEventListener } from "./events";
 
 export function patchDOM(oldVdom, newVdom, parentEl) {
   if (!areNodesEqual(oldVdom, newVdom)) {
@@ -26,6 +27,8 @@ export function patchDOM(oldVdom, newVdom, parentEl) {
       patchElement(oldVdom, newVdom);
       break;
   }
+
+  patchChildren(oldVdom, newVdom);
   return newVdom;
 }
 
@@ -92,4 +95,75 @@ function toClassList(classes = "") {
   return Array.isArray(classes)
     ? classes.filter(isNotBlankOrEmptyString)
     : classes.split(/(\s+)/).filter(isNotBlankOrEmptyString);
+}
+
+function patchStyles(el, oldStyle = {}, newStyle = {}) {
+  const { added, removed, updated } = objectsDiff(oldStyle, newStyle);
+
+  for (const style of removed) {
+    removeStyle(el, style);
+  }
+
+  for (const style of added.concat(updated)) {
+    setStyle(el, style, newStyle[style]);
+  }
+}
+
+function patchEvents(el, oldListeners = {}, oldEvents = {}, newEvents = {}) {
+  const { removed, added, updated } = objectsDiff(oldEvents, newEvents);
+
+  // the DOM function el.removeEventListeners needs a reference of the event listener to be removed
+  // thats why for patch event we need to pass the oldListeners
+  for (const eventName of removed.concat(updated)) {
+    el.removeEventListener(eventName, oldListeners[eventName]);
+  }
+
+  const addedListeners = {};
+
+  for (const eventName of added.concat(updated)) {
+    const listener = addEventListener(eventName, newEvents[eventName], el);
+    addedListeners[eventName] = listener;
+  }
+
+  return addedListeners;
+}
+
+function patchChildren(oldVdom, newVdom) {
+  const oldChildren = extractChildren(oldVdom);
+  const newChildren = extractChildren(newVdom);
+
+  const parentEl = oldVdom.el;
+
+  const diffSeq = arrayDiffSequence(oldChildren, newChildren, areNodesEqual);
+
+  for (const operation of diffSeq) {
+    const { originalIndex, index, item } = operation;
+
+    switch (operation.op) {
+      case ARRAY_DIF_OP.ADD: {
+        // here we can simply use the mountDom function and pass the parent element
+        mountDOM(item, parentEl, index);
+        break;
+      }
+      case ARRAY_DIF_OP.REMOVE: {
+        destroyDOM(item);
+        break;
+      }
+      case ARRAY_DIF_OP.MOVE: {
+        const oldChild = oldChildren[originalIndex];
+        const newChild = newChildren[index];
+        const el = oldChild.el;
+        const elAtTargetIndex = parentEl.childNodes[index];
+
+        parentEl.insertBefore(el, elAtTargetIndex);
+        patchDOM(oldChild, newChild, parentEl);
+
+        break;
+      }
+      case ARRAY_DIF_OP.NOOP: {
+        patchDOM(oldChildren[originalIndex], newChildren[index], parentEl);
+        break;
+      }
+    }
+  }
 }
