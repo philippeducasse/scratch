@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <script type="module">
+      import { createApp, h, hString, hFragment } from "https://unpkg.com/fe-fwk@1";
+
+      const state = { count: 0 };
+      const reducers = {
+        add: (state, amount) => {
+          state.count += amount;
+          return state;
+        },
+        sub: (state, amount) => {
+          state.count -= amount;
+          return state;
+        },
+      };
+
+      function view(state, emit) {
+        return hFragment([
+          h("button", { on: { click: () => emit("sub", 1) } }, [hString(" - ")]),
+          h("span", {}, [hString(state.count)]),
+          h("button", { on: { click: () => emit("add", 1) } }, [hString(" + ")]),
+        ]);
+      }
+
+      createApp({ state, view, reducers }).mount(document.body);
+    </script>
+    <title>Counter</title>
+  </head>
+  <body>
+    <h1>Counter</h1>
+  </body>
+</html>
