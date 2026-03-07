@@ -1,5 +1,7 @@
-import { mountDOM } from "./mount-dom";
 import { destroyDOM } from "./destroy-dom";
+import { mountDOM } from "./mount-dom";
+import { patchDOM } from "./patch-dom";
+import { DOM_TYPES, extractChildren } from "./h";
 
 export function defineComponent({ render, state }) {
   class Component {
@@ -12,11 +14,36 @@ export function defineComponent({ render, state }) {
       this.state = state ? state(props) : {};
     }
 
-    render() {
-      // returns components view of the virtual dom
-      return render();
+    get elements() {
+      if (this.#vdom == null) {
+        return [];
+      }
+      if (this.#vdom.type === DOM_TYPES.FRAGMENT) {
+        return extractChildren(this.#vdom).map((child) => child.el);
+      }
+      // if vdom top node is a sigle node, return its element
+      return [this.#vdom.el];
     }
 
+    get firstElememt() {
+      return this.elements[0];
+    }
+
+    get offset() {
+      if (this.#vdom.type === DOM_TYPES.FRAGMENT) {
+        return Array.from(this.#hostEl.children).indexOf(this.firstElememt);
+      }
+      // if view isn't a fragment offset is 0
+      return 0;
+    }
+
+    updateState(state) {
+      this.state = { ...this.state, ...state };
+      this.#patch();
+    }
+    render() {
+      return render.call(this);
+    }
     mount(hostEl, index = null) {
       if (this.#isMounted) {
         throw new Error("Component is already mounted");
@@ -26,7 +53,6 @@ export function defineComponent({ render, state }) {
       this.#hostEl = hostEl;
       this.#isMounted = true;
     }
-
     unmount() {
       if (!this.#isMounted) {
         throw new Error("Component is not mounted");
@@ -35,6 +61,14 @@ export function defineComponent({ render, state }) {
       this.#vdom = null;
       this.#hostEl = null;
       this.#isMounted = false;
+    }
+    #patch() {
+      if (!this.#isMounted) {
+        throw new Error("Component is not mounted");
+      }
+
+      const vdom = this.render();
+      this.#vdom = patchDOM(this.#vdom, vdom, this.#hostEl, this);
     }
   }
   return Component;

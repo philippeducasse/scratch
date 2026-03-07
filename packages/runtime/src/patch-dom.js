@@ -8,7 +8,7 @@ import { ARRAY_DIF_OP, arrayDiffSequence, arraysDiff } from "./utils/arrays";
 import { isNotBlankOrEmptyString } from "./utils/strings";
 import { addEventListener } from "./events";
 
-export function patchDOM(oldVdom, newVdom, parentEl) {
+export function patchDOM(oldVdom, newVdom, parentEl, hostComponent = null) {
   if (!areNodesEqual(oldVdom, newVdom)) {
     const index = findIndexInParent(parentEl, oldVdom.el);
     destroyDOM(oldVdom);
@@ -28,7 +28,7 @@ export function patchDOM(oldVdom, newVdom, parentEl) {
       break;
   }
 
-  patchChildren(oldVdom, newVdom);
+  patchChildren(oldVdom, newVdom, hostComponent);
   return newVdom;
 }
 
@@ -128,7 +128,7 @@ function patchEvents(el, oldListeners = {}, oldEvents = {}, newEvents = {}) {
   return addedListeners;
 }
 
-function patchChildren(oldVdom, newVdom) {
+function patchChildren(oldVdom, newVdom, hostComponent) {
   const oldChildren = extractChildren(oldVdom);
   const newChildren = extractChildren(newVdom);
 
@@ -136,10 +136,12 @@ function patchChildren(oldVdom, newVdom) {
   const diffSeq = arrayDiffSequence(oldChildren, newChildren, areNodesEqual);
   for (const operation of diffSeq) {
     const { originalIndex, index, item } = operation;
+    const offset = hostComponent?.offset ?? 0;
+
     switch (operation.op) {
       case ARRAY_DIF_OP.ADD: {
         // here we can simply use the mountDom function and pass the parent element
-        mountDOM(item, parentEl, index);
+        mountDOM(item, parentEl, index + offset, hostComponent);
         break;
       }
       case ARRAY_DIF_OP.REMOVE: {
@@ -150,15 +152,15 @@ function patchChildren(oldVdom, newVdom) {
         const oldChild = oldChildren[originalIndex];
         const newChild = newChildren[index];
         const el = oldChild.el;
-        const elAtTargetIndex = parentEl.childNodes[index];
+        const elAtTargetIndex = parentEl.childNodes[index + offset];
 
         parentEl.insertBefore(el, elAtTargetIndex);
-        patchDOM(oldChild, newChild, parentEl);
+        patchDOM(oldChild, newChild, parentEl, hostComponent);
 
         break;
       }
       case ARRAY_DIF_OP.NOOP: {
-        patchDOM(oldChildren[originalIndex], newChildren[index], parentEl);
+        patchDOM(oldChildren[originalIndex], newChildren[index], parentEl, hostComponent);
         break;
       }
     }
