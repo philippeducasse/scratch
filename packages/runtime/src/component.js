@@ -1,8 +1,9 @@
 import { mountDOM } from "./mount-dom";
 import { destroyDOM } from "./destroy-dom";
 import { patchDOM } from "./patch-dom";
+import { hasOwnProperty } from "./utils/objects";
 
-export function defineComponent({ render, state }) {
+export function defineComponent({ render, state, ...methods }) {
   class Component {
     #isMounted = false;
     #vdom = null;
@@ -28,7 +29,7 @@ export function defineComponent({ render, state }) {
         throw new Error("Component is already mounted");
       }
       this.#vdom = this.render();
-      mountDOM(this.#vdom, hostEl, index);
+      mountDOM(this.#vdom, hostEl, index, this);
       this.#hostEl = hostEl;
       this.#isMounted = true;
     }
@@ -51,6 +52,13 @@ export function defineComponent({ render, state }) {
       const vdom = this.render();
       this.#vdom = patchDOM(this.#vdom, vdom, this.#hostEl);
     }
+  }
+
+  for (const method in methods) {
+    if (hasOwnProperty(Component, method)) {
+      throw new Error(`Method ${method} already exists on this component`);
+    }
+    Component.prototype[method] = methods[method];
   }
   return Component;
 }
