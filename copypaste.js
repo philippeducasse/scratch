@@ -270,15 +270,25 @@ function areNodesEqual(nodeOne, nodeTwo) {
   return true;
 }
 
-function defineComponent({ render }) {
+function defineComponent({ render, state }) {
   class Component {
     #isMounted = false;
     #vdom = null;
     #hostEl = null;
 
+    constructor(props = {}) {
+      this.props = props;
+      this.state = state ? state(props) : {};
+    }
+
+    updateState(state) {
+      this.state = { ...this.state, ...state };
+      this.#patch();
+    }
+
     render() {
       // returns components view of the virtual dom
-      return render();
+      return render.call(this);
     }
 
     mount(hostEl, index = null) {
@@ -299,6 +309,15 @@ function defineComponent({ render }) {
       this.#vdom = null;
       this.#hostEl = null;
       this.#isMounted = false;
+    }
+
+    #patch() {
+      if (!this.#isMounted) {
+        throw new Error("Component is not mounted!");
+      }
+
+      const vdom = this.render();
+      this.#vdom = patchDOM(this.#vdom, vdom, this.#hostEl);
     }
   }
   return Component;

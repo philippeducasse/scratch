@@ -1,9 +1,8 @@
 import { destroyDOM } from "./destroy-dom";
-import { mountDOM } from "./mount-dom";
 import { patchDOM } from "./patch-dom";
-import { DOM_TYPES, extractChildren } from "./h";
+import { hasOwnProperty } from "./utils/objects";
 
-export function defineComponent({ render, state }) {
+export function defineComponent({ render, state, ...methods }) {
   class Component {
     #isMounted = false;
     #vdom = null;
@@ -14,15 +13,14 @@ export function defineComponent({ render, state }) {
       this.state = state ? state(props) : {};
     }
 
-    get elements() {
-      if (this.#vdom == null) {
-        return [];
-      }
-      if (this.#vdom.type === DOM_TYPES.FRAGMENT) {
-        return extractChildren(this.#vdom).map((child) => child.el);
-      }
-      // if vdom top node is a sigle node, return its element
-      return [this.#vdom.el];
+    updateState(state) {
+      this.state = { ...this.state, ...state };
+      this.#patch();
+    }
+
+    render() {
+      // returns components view of the virtual dom
+      return render.call(this);
     }
 
     get firstElememt() {
@@ -49,7 +47,7 @@ export function defineComponent({ render, state }) {
         throw new Error("Component is already mounted");
       }
       this.#vdom = this.render();
-      mountDOM(this.#vdom, hostEl, index);
+      mountDOM(this.#vdom, hostEl, index, this);
       this.#hostEl = hostEl;
       this.#isMounted = true;
     }
@@ -62,14 +60,22 @@ export function defineComponent({ render, state }) {
       this.#hostEl = null;
       this.#isMounted = false;
     }
+
     #patch() {
       if (!this.#isMounted) {
-        throw new Error("Component is not mounted");
+        throw new Error("Component is not mounted!");
       }
 
       const vdom = this.render();
-      this.#vdom = patchDOM(this.#vdom, vdom, this.#hostEl, this);
+      this.#vdom = patchDOM(this.#vdom, vdom, this.#hostEl);
     }
+  }
+
+  for (const method in methods) {
+    if (hasOwnProperty(Component, method)) {
+      throw new Error(`Method ${method} already exists on this component`);
+    }
+    Component.prototype[method] = methods[method];
   }
   return Component;
 }
