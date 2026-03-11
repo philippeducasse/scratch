@@ -1,4 +1,5 @@
 import { destroyDOM } from "./destroy-dom";
+import { DOM_TYPES } from "./h";
 import { patchDOM } from "./patch-dom";
 import { hasOwnProperty } from "./utils/objects";
 
@@ -21,6 +22,22 @@ export function defineComponent({ render, state, ...methods }) {
     render() {
       // returns components view of the virtual dom
       return render.call(this);
+    }
+
+    get elements() {
+      if (this.#vdom == null) {
+        return [];
+      }
+      if (this.#vdom.type === DOM_TYPES.FRAGMENT) {
+        return extractChildren(this.#vdom).flatMap((child) => {
+          if (child.type === DOM_TYPES.COMPONENT) {
+            return child.component.elements;
+          }
+          return [child.el];
+        });
+      }
+      // if vdom top node is a sigle node, return its element
+      return [this.#vdom.el];
     }
 
     get firstElememt() {

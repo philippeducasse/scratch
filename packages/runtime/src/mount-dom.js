@@ -16,6 +16,10 @@ export function mountDOM(vdom, parentEl, index, hostComponent) {
       createFragmentNode(vdom, parentEl, index, hostComponent);
       break;
     }
+    case DOM_TYPES.COMPONENT: {
+      CreateComponentNode(vdom, parentEl, index, hostComponent);
+      break;
+    }
 
     default: {
       throw new Error(`Can't mount DOM of type: ${vdom.type}`);
