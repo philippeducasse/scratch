@@ -7,7 +7,7 @@ import { objectsDiff } from "./utils/objects";
 import { ARRAY_DIF_OP, arrayDiffSequence, arraysDiff } from "./utils/arrays";
 import { isNotBlankOrEmptyString } from "./utils/strings";
 import { addEventListener } from "./events";
-
+import { extractPropsAndEvents } from "./utils/props";
 export function patchDOM(oldVdom, newVdom, parentEl, hostComponent = null) {
   if (!areNodesEqual(oldVdom, newVdom)) {
     const index = findIndexInParent(parentEl, oldVdom.el);
@@ -25,6 +25,9 @@ export function patchDOM(oldVdom, newVdom, parentEl, hostComponent = null) {
       return newVdom;
     case DOM_TYPES.ELEMENT:
       patchElement(oldVdom, newVdom, hostComponent);
+      break;
+    case DOM_TYPES.COMPONENT:
+      patchComponent(oldVdom, newVdom);
       break;
   }
 
@@ -165,4 +168,14 @@ function patchChildren(oldVdom, newVdom, hostComponent) {
       }
     }
   }
+}
+
+function patchComponent(oldVdom, newVdom) {
+  const { component } = oldVdom;
+  const { props } = extractPropsAndEvents(newVdom);
+
+  component.updateProps(props);
+
+  newVdom.component = component;
+  newVdom.el = component.firstElement;
 }

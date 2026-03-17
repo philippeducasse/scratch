@@ -322,3 +322,12 @@ function defineComponent({ render, state }) {
   }
   return Component;
 }
+function CreateComponentNode(vdom, parentEl, index, hostComponent) {
+  const Component = vdom.tag;
+  const props = vdom.props;
+  const component = new Component(props);
+
+  component.mount(parentEl, index);
+  vdom.component = component;
+  vdom.el = component.firstElement;
+}
