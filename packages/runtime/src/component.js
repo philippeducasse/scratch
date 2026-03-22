@@ -3,7 +3,13 @@ import { DOM_TYPES } from "./h";
 import { patchDOM } from "./patch-dom";
 import { hasOwnProperty } from "./utils/objects";
 import { Dispatcher } from "./dispatcher";
-export function defineComponent({ render, state, ...methods }) {
+export function defineComponent({
+  render,
+  state,
+  onMounted = () => {},
+  onUnmounted = () => {},
+  ...methods
+}) {
   class Component {
     #isMounted = false;
     #vdom = null;
@@ -18,6 +24,13 @@ export function defineComponent({ render, state, ...methods }) {
       this.state = state ? state(props) : {};
       this.#eventHandlers = eventHandlers;
       this.#parentComponent = parentComponent;
+    }
+
+    onMounted() {
+      return Promise.resolve(onMounted.call(this));
+    }
+    onUnounted() {
+      return Promise.resolve(onUnmounted.call(this));
     }
 
     updateState(state) {
