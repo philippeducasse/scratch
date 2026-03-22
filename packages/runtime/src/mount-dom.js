@@ -2,6 +2,7 @@ import { DOM_TYPES } from "./h.js";
 import { setAttributes } from "./attributes.js";
 import { addEventListeners } from "./events.js";
 import { extractPropsAndEvents } from "./utils/props.js";
+import { enqueueJob } from "./scheduler.js";
 
 export function mountDOM(vdom, parentEl, index, hostComponent) {
   switch (vdom.type) {
@@ -18,7 +19,8 @@ export function mountDOM(vdom, parentEl, index, hostComponent) {
       break;
     }
     case DOM_TYPES.COMPONENT: {
-      CreateComponentNode(vdom, parentEl, index, hostComponent);
+      createComponentNode(vdom, parentEl, index, hostComponent);
+      enqueueJob(() => vdom.component.onMounted());
       break;
     }
 
@@ -80,7 +82,7 @@ function addProps(el, vdom, hostComponent) {
   setAttributes(el, attrs);
 }
 
-function CreateComponentNode(vdom, parentEl, index, hostComponent) {
+function createComponentNode(vdom, parentEl, index, hostComponent) {
   const Component = vdom.tag;
   const { props, events } = extractPropsAndEvents(vdom);
   const component = new Component(props, events, hostComponent);
