@@ -1,12 +1,27 @@
-# {{name}}
+# Scratch
 
-![fe-fwk](https://img.shields.io/badge/fe--fwk-book-blueviolet)
+A frontend framework built as an educational project to teach how frontend frameworks work under the hood.
 
-Code for the book "Build a frontend framework from scratch".
-You can get your copy [here]({{bookUrl}}) and start learning how frontend frameworks work by building your own, from scratch!
+## Packages
 
-## Commands
+This monorepo contains three core packages:
 
-This package has the following commands:
+- **compiler** - Compiles template syntax into JavaScript
+- **loader** - Loads and processes components  
+- **runtime** - The runtime engine that executes components
 
-- `npm run serve:examples` - Starts an http server to serve the example applications
+## Getting Started
+
+Install dependencies:
+```bash
+npm install
+```
+
+Serve the example applications:
+```bash
+npm run serve:examples
+```
+
+## License
+
+MIT
